@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — Tuition Management</title>
+  <meta name="description" content="Admin dashboard for managing tuition class website content.">
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════
+       LOGIN SCREEN
+       ═══════════════════════════════════════════════════════ -->
+  <div class="login-wrapper" id="loginScreen">
+    <div class="login-card">
+      <div class="login-icon">🔐</div>
+      <h1>Admin Login</h1>
+      <p class="subtitle">Enter your credentials to access the dashboard</p>
+      <form id="loginForm" autocomplete="off">
+        <div class="input-group">
+          <label for="loginUsername">Username</label>
+          <input type="text" id="loginUsername" placeholder="Enter username" required>
+        </div>
+        <div class="input-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" placeholder="Enter password" required>
+        </div>
+        <p class="login-error" id="loginError">Invalid username or password</p>
+        <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       DASHBOARD
+       ═══════════════════════════════════════════════════════ -->
+  <div class="dashboard" id="dashboard">
+
+    <!-- Sidebar Overlay (mobile) -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- ─── Sidebar ──────────────────────────────────────── -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">🎓</div>
+        <div class="brand-text">
+          <h2 id="sidebarTitle">Admin Panel</h2>
+          <span>Dashboard</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-label">Overview</div>
+        <div class="nav-item active" data-panel="overview">
+          <span class="nav-icon">📊</span> Dashboard
+        </div>
+
+        <div class="nav-label">Content</div>
+        <div class="nav-item" data-panel="siteInfo">
+          <span class="nav-icon">🏠</span> Site Info
+        </div>
+        <div class="nav-item" data-panel="courses">
+          <span class="nav-icon">📚</span> Courses
+        </div>
+        <div class="nav-item" data-panel="degreeOptions">
+          <span class="nav-icon">🎓</span> Degree Options
+        </div>
+        <div class="nav-item" data-panel="results">
+          <span class="nav-icon">🏆</span> Results / Toppers
+        </div>
+        <div class="nav-item" data-panel="govtExams">
+          <span class="nav-icon">📋</span> Govt Exam Prep
+        </div>
+
+        <div class="nav-label">Management</div>
+        <div class="nav-item" data-panel="applications">
+          <span class="nav-icon">📝</span> Applications
+          <span class="nav-badge" id="appCountBadge">0</span>
+        </div>
+        <div class="nav-item" data-panel="settings">
+          <span class="nav-icon">⚙️</span> Settings
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="logout-btn" id="logoutBtn">
+          <span>🚪</span> Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- ─── Main Content ─────────────────────────────────── -->
+    <main class="main-content">
+      <div class="content-header" id="contentHeader">
+        <div>
+          <h1 id="panelTitle">Dashboard</h1>
+          <div class="header-subtitle" id="panelSubtitle">Overview of your tuition center</div>
+        </div>
+        <div id="headerActions"></div>
+      </div>
+
+      <div class="content-body">
+
+        <!-- ═══ OVERVIEW PANEL ═══════════════════════════════ -->
+        <div class="panel active" id="panel-overview">
+          <div class="stats-row" id="statsRow"></div>
+          <div class="content-card">
+            <div class="card-header">
+              <h3>Recent Applications</h3>
+              <button class="btn btn-sm btn-secondary" onclick="AdminApp.switchPanel('applications')">View All →</button>
+            </div>
+            <div class="card-body">
+              <div class="data-table-wrapper">
+                <table class="data-table" id="recentAppsTable">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Mobile</th>
+                      <th>Category</th>
+                      <th>Date</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recentAppsBody"></tbody>
+                </table>
+              </div>
+              <div class="empty-state" id="recentAppsEmpty" style="display:none;">
+                <div class="empty-icon">📝</div>
+                <h3>No applications yet</h3>
+                <p>Student applications will appear here once they apply through the website.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ SITE INFO PANEL ══════════════════════════════ -->
+        <div class="panel" id="panel-siteInfo">
+          <div class="content-card">
+            <div class="card-header">
+              <h3>Company & Owner Details</h3>
+            </div>
+            <div class="card-body">
+              <form id="siteInfoForm">
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="siCompanyName">Company / Class Name</label>
+                    <input type="text" id="siCompanyName">
+                  </div>
+                  <div class="form-group">
+                    <label for="siTagline">Tagline</label>
+                    <input type="text" id="siTagline">
+                  </div>
+                  <div class="form-group">
+                    <label for="siOwnerName">Owner Name</label>
+                    <input type="text" id="siOwnerName">
+                  </div>
+                  <div class="form-group">
+                    <label for="siOwnerTitle">Owner Title / Designation</label>
+                    <input type="text" id="siOwnerTitle">
+                  </div>
+                  <div class="form-group">
+                    <label for="siPhone">Phone</label>
+                    <input type="tel" id="siPhone">
+                  </div>
+                  <div class="form-group">
+                    <label for="siEmail">Email</label>
+                    <input type="email" id="siEmail">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="siAddress">Address</label>
+                  <textarea id="siAddress" rows="2"></textarea>
+                </div>
+
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label>Logo Image</label>
+                    <div class="image-upload-area" id="logoUploadArea">
+                      <input type="file" accept="image/*" id="logoFileInput">
+                      <div class="upload-icon">🖼️</div>
+                      <p>Click or drag to upload logo</p>
+                    </div>
+                    <div style="margin-top:0.8rem;display:flex;align-items:center;gap:0.8rem;">
+                      <img class="image-preview" id="logoPreview" src="" alt="Logo preview" style="display:none;">
+                      <button type="button" class="btn btn-sm btn-danger" id="logoRemoveBtn" style="display:none;" onclick="AdminApp.removeImage('logo')">Remove</button>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>Owner Photo</label>
+                    <div class="image-upload-area" id="ownerUploadArea">
+                      <input type="file" accept="image/*" id="ownerFileInput">
+                      <div class="upload-icon">📷</div>
+                      <p>Click or drag to upload photo</p>
+                    </div>
+                    <div style="margin-top:0.8rem;display:flex;align-items:center;gap:0.8rem;">
+                      <img class="image-preview" id="ownerPreview" src="" alt="Owner preview" style="display:none;">
+                      <button type="button" class="btn btn-sm btn-danger" id="ownerRemoveBtn" style="display:none;" onclick="AdminApp.removeImage('owner')">Remove</button>
+                    </div>
+                  </div>
+                </div>
+
+                <h3 style="margin:1.5rem 0 1rem; font-size:1rem; color:var(--text-heading);">Social Links</h3>
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="siFacebook">Facebook URL</label>
+                    <input type="url" id="siFacebook" placeholder="https://facebook.com/...">
+                  </div>
+                  <div class="form-group">
+                    <label for="siInstagram">Instagram URL</label>
+                    <input type="url" id="siInstagram" placeholder="https://instagram.com/...">
+                  </div>
+                  <div class="form-group">
+                    <label for="siYoutube">YouTube URL</label>
+                    <input type="url" id="siYoutube" placeholder="https://youtube.com/...">
+                  </div>
+                  <div class="form-group">
+                    <label for="siWhatsapp">WhatsApp Number</label>
+                    <input type="text" id="siWhatsapp" placeholder="+91 98765 43210">
+                  </div>
+                </div>
+
+                <div class="form-actions">
+                  <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+                  <button type="button" class="btn btn-secondary" onclick="AdminApp.loadSiteInfo()">↩️ Discard</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ COURSES PANEL ════════════════════════════════ -->
+        <div class="panel" id="panel-courses">
+          <div id="coursesContent"></div>
+        </div>
+
+        <!-- ═══ DEGREE OPTIONS PANEL ═════════════════════════ -->
+        <div class="panel" id="panel-degreeOptions">
+          <div class="content-card">
+            <div class="card-header">
+              <h3>Degree College Course Options</h3>
+            </div>
+            <div class="card-body">
+              <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:1.2rem;">
+                These options appear in the student application form when they select "Degree College". Add, edit, or remove options below.
+              </p>
+              <div class="add-option-row">
+                <input type="text" id="newDegreeInput" placeholder="Enter new degree option (e.g. B.Com)">
+                <button class="btn btn-primary" onclick="AdminApp.addDegreeOption()">+ Add</button>
+              </div>
+              <div class="tag-list" id="degreeTagList"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ RESULTS PANEL ════════════════════════════════ -->
+        <div class="panel" id="panel-results">
+          <div id="resultsContent"></div>
+        </div>
+
+        <!-- ═══ GOVT EXAMS PANEL ═════════════════════════════ -->
+        <div class="panel" id="panel-govtExams">
+          <div id="govtExamsContent"></div>
+        </div>
+
+        <!-- ═══ APPLICATIONS PANEL ═══════════════════════════ -->
+        <div class="panel" id="panel-applications">
+          <div class="content-card">
+            <div class="card-header">
+              <h3>All Student Applications</h3>
+              <div style="display:flex;gap:0.5rem;">
+                <button class="btn btn-sm btn-secondary" onclick="AdminApp.exportApplicationsCSV()">📥 Export CSV</button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="data-table-wrapper">
+                <table class="data-table" id="allAppsTable">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Name</th>
+                      <th>Mobile</th>
+                      <th>Category</th>
+                      <th>Board</th>
+                      <th>Class / Course</th>
+                      <th>Date</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="allAppsBody"></tbody>
+                </table>
+              </div>
+              <div class="empty-state" id="allAppsEmpty" style="display:none;">
+                <div class="empty-icon">📝</div>
+                <h3>No applications received</h3>
+                <p>Student applications submitted through the website will appear here.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ SETTINGS PANEL ═══════════════════════════════ -->
+        <div class="panel" id="panel-settings">
+          <div class="content-card">
+            <div class="card-header">
+              <h3>Change Admin Password</h3>
+            </div>
+            <div class="card-body">
+              <form id="passwordForm" style="max-width:400px;">
+                <div class="form-group">
+                  <label for="currentPassword">Current Password</label>
+                  <input type="password" id="currentPassword" required>
+                </div>
+                <div class="form-group">
+                  <label for="newPassword">New Password</label>
+                  <input type="password" id="newPassword" required minlength="4">
+                </div>
+                <div class="form-group">
+                  <label for="confirmPassword">Confirm New Password</label>
+                  <input type="password" id="confirmPassword" required minlength="4">
+                </div>
+                <div class="form-actions">
+                  <button type="submit" class="btn btn-primary">🔑 Update Password</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="content-card">
+            <div class="card-header">
+              <h3>Data Management</h3>
+            </div>
+            <div class="card-body">
+              <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:1rem;">Reset all data back to default values. This will erase all changes you've made.</p>
+              <button class="btn btn-danger" onclick="AdminApp.confirmResetData()">⚠️ Reset All Data to Defaults</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-toggle" id="mobileToggle">☰</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       MODAL (shared)
+       ═══════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modalTitle">Modal</h2>
+        <button class="modal-close" onclick="AdminApp.closeModal()">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-footer" id="modalFooter"></div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BrightMinds Academy — Empowering Students, Shaping Futures</title>
+  <meta name="description" content="BrightMinds Academy offers expert tuition for School (1-10), Junior College (11-12), Degree courses, and Government Exam preparation. Enroll today!">
+  <meta name="keywords" content="tuition classes, coaching, school tuition, college tuition, exam preparation, SSC, CBSE, ICSE, IGCSE">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════
+       NAVIGATION
+       ═══════════════════════════════════════════════════════ -->
+  <nav class="navbar" id="navbar">
+    <div class="container">
+      <a href="#" class="nav-brand">
+        <div class="brand-logo" id="navBrandLogo">🎓</div>
+        <span class="brand-name" id="navBrandName">BrightMinds Academy</span>
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#courses">Courses</a></li>
+        <li><a href="#apply">Apply</a></li>
+        <li><a href="#results">Results</a></li>
+        <li><a href="#govt-exams">Govt Exams</a></li>
+        <li><a href="#apply" class="nav-cta">Enroll Now</a></li>
+      </ul>
+      <button class="nav-mobile-toggle" id="navMobileToggle">☰</button>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════════════════
+       HERO SECTION
+       ═══════════════════════════════════════════════════════ -->
+  <section class="hero" id="hero">
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-badge">🌟 Trusted by 1000+ Students & Parents</div>
+        <h1 id="heroCompanyName">Excellence in <span>Education</span></h1>
+        <p class="hero-desc" id="heroTagline">Empowering Students, Shaping Futures</p>
+        <div class="hero-buttons">
+          <a href="#apply" class="btn btn-gold">✏️ Apply Now</a>
+          <a href="#courses" class="btn btn-outline">📚 View Courses</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="owner-card">
+          <div class="owner-avatar">
+            <div class="owner-avatar-inner" id="ownerAvatarInner">👤</div>
+          </div>
+          <div class="owner-name" id="ownerName">Director</div>
+          <div class="owner-title" id="ownerTitle">Founder</div>
+          <div class="owner-stats">
+            <div class="owner-stat">
+              <div class="stat-num" id="statCourses">6+</div>
+              <div class="stat-txt">Courses</div>
+            </div>
+            <div class="owner-stat">
+              <div class="stat-num" id="statToppers">7+</div>
+              <div class="stat-txt">Toppers</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════
+       COURSES SECTION
+       ═══════════════════════════════════════════════════════ -->
+  <section class="courses-section" id="courses">
+    <div class="container">
+      <div class="section-title reveal">
+        <span class="section-label">What We Offer</span>
+        <h2>Our Courses</h2>
+        <p>Comprehensive coaching programs designed to help every student excel</p>
+      </div>
+      <div class="course-filters" id="courseFilters">
+        <button class="course-filter-btn active" data-filter="all">All</button>
+        <button class="course-filter-btn" data-filter="school">School</button>
+        <button class="course-filter-btn" data-filter="junior">Junior College</button>
+        <button class="course-filter-btn" data-filter="degree">Degree</button>
+        <button class="course-filter-btn" data-filter="govt">Govt Exams</button>
+      </div>
+      <div class="courses-grid" id="coursesGrid"></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════
+       APPLICATION FORM SECTION
+       ═══════════════════════════════════════════════════════ -->
+  <section class="apply-section" id="apply">
+    <div class="container">
+      <div class="section-title reveal">
+        <span class="section-label">Join Us</span>
+        <h2>Apply for Tuition</h2>
+        <p>Fill in your details and we'll get back to you shortly</p>
+      </div>
+
+      <div class="apply-form-wrapper reveal">
+        <div class="apply-form">
+          <!-- Step Indicator -->
+          <div class="form-steps">
+            <div class="form-step-indicator active">
+              <span class="step-num">1</span>
+              <span>Personal</span>
+            </div>
+            <div class="step-divider"></div>
+            <div class="form-step-indicator">
+              <span class="step-num">2</span>
+              <span>Academic</span>
+            </div>
+            <div class="step-divider"></div>
+            <div class="form-step-indicator">
+              <span class="step-num">3</span>
+              <span>Review</span>
+            </div>
+          </div>
+
+          <div id="applyFormContent">
+            <form id="applyForm" autocomplete="off">
+
+              <!-- STEP 1: Personal Info -->
+              <div class="form-step-content active" id="step1">
+                <div class="form-field">
+                  <label for="applyName">Full Name *</label>
+                  <input type="text" id="applyName" placeholder="Enter student's full name" required>
+                </div>
+                <div class="form-row">
+                  <div class="form-field">
+                    <label for="applyMobile">Mobile Number *</label>
+                    <input type="tel" id="applyMobile" placeholder="10-digit mobile number" required>
+                  </div>
+                  <div class="form-field">
+                    <label for="applyEmail">Email (optional)</label>
+                    <input type="email" id="applyEmail" placeholder="email@example.com">
+                  </div>
+                </div>
+                <div class="form-nav" style="justify-content:flex-end;">
+                  <button type="button" class="btn-form-next" id="btnStep1Next">Next →</button>
+                </div>
+              </div>
+
+              <!-- STEP 2: Academic Details -->
+              <div class="form-step-content" id="step2">
+                <div class="form-field">
+                  <label for="applyCategory">Category *</label>
+                  <select id="applyCategory">
+                    <option value="">Select Category</option>
+                    <option value="school">School (Class 1–10)</option>
+                    <option value="junior">Junior College (11th–12th)</option>
+                    <option value="degree">Degree College</option>
+                  </select>
+                </div>
+
+                <!-- Board (for school & junior) -->
+                <div class="form-field" id="boardGroup" style="display:none;">
+                  <label for="applyBoard">Board *</label>
+                  <select id="applyBoard">
+                    <option value="">Select Board</option>
+                  </select>
+                </div>
+
+                <!-- School: Class 1-10 -->
+                <div id="schoolFields" style="display:none;">
+                  <div class="form-field">
+                    <label for="applyClass">Class *</label>
+                    <select id="applyClass">
+                      <option value="">Select Class</option>
+                      <option value="1">Class 1</option>
+                      <option value="2">Class 2</option>
+                      <option value="3">Class 3</option>
+                      <option value="4">Class 4</option>
+                      <option value="5">Class 5</option>
+                      <option value="6">Class 6</option>
+                      <option value="7">Class 7</option>
+                      <option value="8">Class 8</option>
+                      <option value="9">Class 9</option>
+                      <option value="10">Class 10</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Junior College: 11th/12th + Stream -->
+                <div id="juniorFields" style="display:none;">
+                  <div class="form-row">
+                    <div class="form-field">
+                      <label for="applyJrClass">Class *</label>
+                      <select id="applyJrClass">
+                        <option value="">Select</option>
+                        <option value="11th">11th</option>
+                        <option value="12th">12th</option>
+                      </select>
+                    </div>
+                    <div class="form-field">
+                      <label for="applyStream">Stream *</label>
+                      <select id="applyStream">
+                        <option value="">Select Stream</option>
+                        <option value="Science">Science</option>
+                        <option value="Commerce">Commerce</option>
+                        <option value="Arts">Arts</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Degree College: Dynamic options -->
+                <div id="degreeFields" style="display:none;">
+                  <div class="form-field">
+                    <label for="applyDegree">Course *</label>
+                    <select id="applyDegree">
+                      <option value="">Select Course</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-nav">
+                  <button type="button" class="btn-form-back" id="btnStep2Back">← Back</button>
+                  <button type="button" class="btn-form-next" id="btnStep2Next">Next →</button>
+                </div>
+              </div>
+
+              <!-- STEP 3: Review -->
+              <div class="form-step-content" id="step3">
+                <div style="background:rgba(255,255,255,0.04);border-radius:var(--radius-md);padding:1.2rem;margin-bottom:1.2rem;">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                    <div>
+                      <div style="font-size:0.72rem;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.2rem;">Name</div>
+                      <div style="color:#fff;font-weight:500;" id="reviewName">—</div>
+                    </div>
+                    <div>
+                      <div style="font-size:0.72rem;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.2rem;">Mobile</div>
+                      <div style="color:#fff;font-weight:500;" id="reviewMobile">—</div>
+                    </div>
+                    <div>
+                      <div style="font-size:0.72rem;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.2rem;">Email</div>
+                      <div style="color:#fff;font-weight:500;" id="reviewEmail">—</div>
+                    </div>
+                    <div>
+                      <div style="font-size:0.72rem;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.2rem;">Category</div>
+                      <div style="color:#fff;font-weight:500;" id="reviewCategory">—</div>
+                    </div>
+                  </div>
+                  <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.08);">
+                    <div style="font-size:0.72rem;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.2rem;">Course / Class Details</div>
+                    <div style="color:var(--gold);font-weight:600;font-size:1.05rem;" id="reviewCourse">—</div>
+                  </div>
+                </div>
+                <div class="form-nav">
+                  <button type="button" class="btn-form-back" id="btnStep3Back">← Back</button>
+                  <button type="button" class="btn-form-submit" id="btnSubmit">✅ Submit Application</button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- Success State -->
+          <div class="form-success" id="formSuccess">
+            <div class="success-icon">🎉</div>
+            <h3>Application Submitted!</h3>
+            <p>Thank you for your interest. We will contact you shortly on your registered mobile number.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════
+       RESULTS SECTION
+       ═══════════════════════════════════════════════════════ -->
+  <section class="results-section" id="results">
+    <div class="container">
+      <div class="section-title reveal">
+        <span class="section-label">Our Achievements</span>
+        <h2>Toppers & Results</h2>
+        <p>Celebrating the success of our brightest stars across all boards</p>
+      </div>
+
+      <div class="results-filters" id="resultsFilters">
+        <div class="result-filter-group" id="catFilterGroup">
+          <button class="result-filter-btn active" data-filter="all">All</button>
+          <button class="result-filter-btn" data-filter="school">School (10th)</button>
+          <button class="result-filter-btn" data-filter="college">College (12th)</button>
+        </div>
+        <div class="result-filter-group" id="boardFilterGroup">
+          <button class="result-filter-btn active" data-filter="all">All Boards</button>
+          <button class="result-filter-btn" data-filter="SSC">SSC</button>
+          <button class="result-filter-btn" data-filter="CBSE">CBSE</button>
+          <button class="result-filter-btn" data-filter="ICSE">ICSE</button>
+          <button class="result-filter-btn" data-filter="IGCSE">IGCSE</button>
+        </div>
+      </div>
+
+      <div class="results-grid" id="resultsGrid"></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════
+       GOVT EXAMS SECTION
+       ═══════════════════════════════════════════════════════ -->
+  <section class="govt-section" id="govt-exams">
+    <div class="container">
+      <div class="section-title reveal">
+        <span class="section-label">Career Preparation</span>
+        <h2>Government Exam Preparation</h2>
+        <p>Structured coaching programs to help you crack competitive exams</p>
+      </div>
+      <div class="govt-grid" id="govtGrid"></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════
+       FOOTER
+       ═══════════════════════════════════════════════════════ -->
+  <footer class="footer" id="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-logo">
+            <span>🎓</span>
+            <span class="footer-logo-name" id="footerCompanyName">BrightMinds Academy</span>
+          </div>
+          <p id="footerDesc">Empowering Students, Shaping Futures</p>
+          <div class="footer-social">
+            <a href="#" id="socialFb" title="Facebook" style="display:none;">📘</a>
+            <a href="#" id="socialIg" title="Instagram" style="display:none;">📸</a>
+            <a href="#" id="socialYt" title="YouTube" style="display:none;">▶️</a>
+            <a href="#" id="socialWa" title="WhatsApp" style="display:none;">💬</a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="#courses">Courses</a></li>
+            <li><a href="#apply">Apply Now</a></li>
+            <li><a href="#results">Results</a></li>
+            <li><a href="#govt-exams">Govt Exams</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Programs</h4>
+          <ul>
+            <li><a href="#courses">School Tuition</a></li>
+            <li><a href="#courses">Junior College</a></li>
+            <li><a href="#courses">Degree College</a></li>
+            <li><a href="#govt-exams">Exam Prep</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Contact Us</h4>
+          <ul class="footer-contact">
+            <li><span>📍</span> <span id="footerAddress">Loading...</span></li>
+            <li><span>📞</span> <span id="footerPhone">Loading...</span></li>
+            <li><span>✉️</span> <span id="footerEmail">Loading...</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2025 <span id="footerCopy">BrightMinds Academy</span>. All rights reserved. &nbsp;|&nbsp; <a href="admin.html">Admin</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+ 
+ 
+ 
+ 
+ 
+ <script>
+const boardsByCategory = {
+  school: ["SSC", "CBSE", "ICSE"],
+  junior: ["HSC", "CBSE", "ICSE"]
+};
+
+const categorySelect = document.getElementById("applyCategory");
+const boardSelect = document.getElementById("applyBoard");
+const boardGroup = document.getElementById("boardGroup");
+
+categorySelect.addEventListener("change", function () {
+  const category = this.value;
+
+  // Show/hide board field
+  if (category === "school" || category === "junior") {
+    boardGroup.style.display = "block";
+  } else {
+    boardGroup.style.display = "none";
+  }
+
+  // Reset options
+  boardSelect.innerHTML = '<option value="">Select Board</option>';
+
+  // Add correct boards
+  if (boardsByCategory[category]) {
+    boardsByCategory[category].forEach(board => {
+      const option = document.createElement("option");
+      option.value = board;
+      option.textContent = board;
+      boardSelect.appendChild(option);
+    });
+  }
+});
+</script>
+</body>
+</html>
