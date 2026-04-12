@@ -1,6 +1,6 @@
 """
 server.py — Flask Backend for Tuition Class Website
-Serves the frontend + provides REST API with MySQL database.
+Supabase (PostgreSQL) version. Replaces mysql.connector with psycopg2.
 """
 
 import os
@@ -11,28 +11,33 @@ from functools import wraps
 
 from flask import Flask, request, jsonify, send_from_directory, session
 from flask_cors import CORS
-import mysql.connector
-from mysql.connector import Error
+import psycopg2
+import psycopg2.extras   # provides RealDictCursor (equivalent of dictionary=True)
+from psycopg2 import Error
 
-# ─── Configuration ───────────────────────────────────────────
+# ─── Configuration ───────────────────────────────────────────────────────────
+# Set these as environment variables (e.g. in your .env or hosting platform).
+# Get values from: Supabase Dashboard → Settings → Database
 DB_CONFIG = {
-    'host': os.environ.get('DB_HOST', 'localhost'),
-    'user': os.environ.get('DB_USER', 'root'),
-    'password': os.environ.get('DB_PASSWORD', 'mysql'),
-    'database': os.environ.get('DB_NAME', 'tuition_db'),
-    'port': int(os.environ.get('DB_PORT', 3306))
+    'host':     os.environ.get('DB_HOST',     'db.YOUR_PROJECT_REF.supabase.co'),
+    'port':     int(os.environ.get('DB_PORT', 5432)),
+    'dbname':   os.environ.get('DB_NAME',     'postgres'),
+    'user':     os.environ.get('DB_USER',     'postgres'),
+    'password': os.environ.get('DB_PASSWORD', 'YOUR_DB_PASSWORD'),
+    'sslmode':  'require'   # mandatory for Supabase
 }
+
 app = Flask(__name__, static_folder='.', static_url_path='')
-app.secret_key = 'tuition-admin-secret-key-change-in-production'
+app.secret_key = os.environ.get('SECRET_KEY', 'tuition-admin-secret-key-change-in-production')
 CORS(app)
 
 
-# ─── Database Helpers ────────────────────────────────────────
+# ─── Database Helpers ────────────────────────────────────────────────────────
 
 def get_db():
-    """Get a database connection."""
+    """Open a new PostgreSQL connection."""
     try:
-        conn = mysql.connector.connect(**DB_CONFIG)
+        conn = psycopg2.connect(**DB_CONFIG)
         return conn
     except Error as e:
         print(f"Database connection error: {e}")
@@ -40,20 +45,38 @@ def get_db():
 
 
 def query_db(sql, params=None, fetchone=False, commit=False):
-    """Execute a query and return results."""
+    """
+    Execute a query and return results.
+
+    Key differences from the MySQL version:
+      - Uses RealDictCursor so rows behave like dicts (same as dictionary=True).
+      - For INSERT with commit=True, uses RETURNING id to get the new row's id
+        (MySQL used cursor.lastrowid; PostgreSQL needs RETURNING).
+      - %s placeholders are identical — no changes needed in SQL strings.
+    """
     conn = get_db()
     if not conn:
         return None
     try:
-        cursor = conn.cursor(dictionary=True)
+        # RealDictCursor returns rows as dicts, matching MySQL's dictionary=True
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute(sql, params or ())
+
         if commit:
             conn.commit()
-            return cursor.lastrowid
+            # Try to return the id of the inserted/updated row
+            try:
+                row = cursor.fetchone()
+                return row['id'] if row else None
+            except Exception:
+                return None
+
         if fetchone:
             return cursor.fetchone()
         return cursor.fetchall()
+
     except Error as e:
+        conn.rollback()
         print(f"Query error: {e}")
         return None
     finally:
@@ -61,11 +84,10 @@ def query_db(sql, params=None, fetchone=False, commit=False):
 
 
 def hash_password(password):
-    """Simple SHA256 hash for passwords."""
     return hashlib.sha256(password.encode()).hexdigest()
 
 
-# ─── Auth Decorator ──────────────────────────────────────────
+# ─── Auth Decorator ──────────────────────────────────────────────────────────
 
 def admin_required(f):
     @wraps(f)
@@ -76,7 +98,7 @@ def admin_required(f):
     return decorated
 
 
-# ─── Static File Serving ─────────────────────────────────────
+# ─── Static File Serving ─────────────────────────────────────────────────────
 
 @app.route('/')
 def serve_index():
@@ -88,9 +110,9 @@ def serve_static(path):
     return send_from_directory('.', path)
 
 
-# ═══════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
 #  AUTH API
-# ═══════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
 
 @app.route('/api/login', methods=['POST'])
 def login():
@@ -140,16 +162,16 @@ def change_password():
         return jsonify({'success': False, 'message': 'Current password is incorrect'}), 400
 
     query_db(
-        'UPDATE admin_users SET password = %s WHERE id = %s',
+        'UPDATE admin_users SET password = %s WHERE id = %s RETURNING id',
         (hash_password(new_pass), session['admin_id']),
         commit=True
     )
     return jsonify({'success': True, 'message': 'Password updated'})
 
 
-# ═══════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
 #  SITE INFO API
-# ═══════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
 
 @app.route('/api/site-info', methods=['GET'])
 def get_site_info():
@@ -177,20 +199,20 @@ def update_site_info():
         )
         if existing:
             query_db(
-                'UPDATE site_info SET setting_value = %s WHERE setting_key = %s',
+                'UPDATE site_info SET setting_value = %s WHERE setting_key = %s RETURNING id',
                 (val_str, key), commit=True
             )
         else:
             query_db(
-                'INSERT INTO site_info (setting_key, setting_value) VALUES (%s, %s)',
+                'INSERT INTO site_info (setting_key, setting_value) VALUES (%s, %s) RETURNING id',
                 (key, val_str), commit=True
             )
     return jsonify({'success': True, 'message': 'Site info updated'})
 
 
-# ═══════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
 #  COURSES API
-# ═══════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
 
 @app.route('/api/courses', methods=['GET'])
 def get_courses():
@@ -203,7 +225,7 @@ def get_courses():
 def add_course():
     data = request.json
     new_id = query_db(
-        'INSERT INTO courses (name, category, description, icon) VALUES (%s, %s, %s, %s)',
+        'INSERT INTO courses (name, category, description, icon) VALUES (%s, %s, %s, %s) RETURNING id',
         (data['name'], data['category'], data.get('description', ''), data.get('icon', '📖')),
         commit=True
     )
@@ -215,7 +237,7 @@ def add_course():
 def update_course(course_id):
     data = request.json
     query_db(
-        'UPDATE courses SET name=%s, category=%s, description=%s, icon=%s WHERE id=%s',
+        'UPDATE courses SET name=%s, category=%s, description=%s, icon=%s WHERE id=%s RETURNING id',
         (data['name'], data['category'], data.get('description', ''), data.get('icon', '📖'), course_id),
         commit=True
     )
@@ -225,13 +247,13 @@ def update_course(course_id):
 @app.route('/api/courses/<int:course_id>', methods=['DELETE'])
 @admin_required
 def delete_course(course_id):
-    query_db('DELETE FROM courses WHERE id = %s', (course_id,), commit=True)
+    query_db('DELETE FROM courses WHERE id = %s RETURNING id', (course_id,), commit=True)
     return jsonify({'success': True, 'message': 'Course deleted'})
 
 
-# ═══════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
 #  DEGREE OPTIONS API
-# ═══════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
 
 @app.route('/api/degree-options', methods=['GET'])
 def get_degree_options():
@@ -244,7 +266,7 @@ def get_degree_options():
 def add_degree_option():
     data = request.json
     new_id = query_db(
-        'INSERT INTO degree_options (name) VALUES (%s)',
+        'INSERT INTO degree_options (name) VALUES (%s) RETURNING id',
         (data['name'],), commit=True
     )
     return jsonify({'success': True, 'id': new_id, 'message': 'Degree option added'})
@@ -253,13 +275,13 @@ def add_degree_option():
 @app.route('/api/degree-options/<int:option_id>', methods=['DELETE'])
 @admin_required
 def delete_degree_option(option_id):
-    query_db('DELETE FROM degree_options WHERE id = %s', (option_id,), commit=True)
+    query_db('DELETE FROM degree_options WHERE id = %s RETURNING id', (option_id,), commit=True)
     return jsonify({'success': True, 'message': 'Degree option deleted'})
 
 
-# ═══════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
 #  RESULTS API
-# ═══════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
 
 @app.route('/api/results', methods=['GET'])
 def get_results():
@@ -273,7 +295,7 @@ def add_result():
     data = request.json
     new_id = query_db(
         '''INSERT INTO results (name, board, exam_class, year, percentage, details, image_url, category, stream)
-           VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)''',
+           VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id''',
         (data['name'], data['board'], data['examClass'], data['year'],
          data['percentage'], data.get('details', ''), data.get('imageUrl', ''),
          data['category'], data.get('stream', '')),
@@ -288,7 +310,7 @@ def update_result(result_id):
     data = request.json
     query_db(
         '''UPDATE results SET name=%s, board=%s, exam_class=%s, year=%s, percentage=%s,
-           details=%s, image_url=%s, category=%s, stream=%s WHERE id=%s''',
+           details=%s, image_url=%s, category=%s, stream=%s WHERE id=%s RETURNING id''',
         (data['name'], data['board'], data['examClass'], data['year'],
          data['percentage'], data.get('details', ''), data.get('imageUrl', ''),
          data['category'], data.get('stream', ''), result_id),
@@ -300,13 +322,13 @@ def update_result(result_id):
 @app.route('/api/results/<int:result_id>', methods=['DELETE'])
 @admin_required
 def delete_result(result_id):
-    query_db('DELETE FROM results WHERE id = %s', (result_id,), commit=True)
+    query_db('DELETE FROM results WHERE id = %s RETURNING id', (result_id,), commit=True)
     return jsonify({'success': True, 'message': 'Result deleted'})
 
 
-# ═══════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
 #  GOVT EXAMS API
-# ═══════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
 
 @app.route('/api/govt-exams', methods=['GET'])
 def get_govt_exams():
@@ -319,7 +341,7 @@ def get_govt_exams():
 def add_govt_exam():
     data = request.json
     new_id = query_db(
-        'INSERT INTO govt_exams (name, description, details, icon) VALUES (%s, %s, %s, %s)',
+        'INSERT INTO govt_exams (name, description, details, icon) VALUES (%s, %s, %s, %s) RETURNING id',
         (data['name'], data.get('description', ''), data.get('details', ''), data.get('icon', '📋')),
         commit=True
     )
@@ -331,7 +353,7 @@ def add_govt_exam():
 def update_govt_exam(exam_id):
     data = request.json
     query_db(
-        'UPDATE govt_exams SET name=%s, description=%s, details=%s, icon=%s WHERE id=%s',
+        'UPDATE govt_exams SET name=%s, description=%s, details=%s, icon=%s WHERE id=%s RETURNING id',
         (data['name'], data.get('description', ''), data.get('details', ''), data.get('icon', '📋'), exam_id),
         commit=True
     )
@@ -341,19 +363,18 @@ def update_govt_exam(exam_id):
 @app.route('/api/govt-exams/<int:exam_id>', methods=['DELETE'])
 @admin_required
 def delete_govt_exam(exam_id):
-    query_db('DELETE FROM govt_exams WHERE id = %s', (exam_id,), commit=True)
+    query_db('DELETE FROM govt_exams WHERE id = %s RETURNING id', (exam_id,), commit=True)
     return jsonify({'success': True, 'message': 'Exam deleted'})
 
 
-# ═══════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
 #  APPLICATIONS API
-# ═══════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
 
 @app.route('/api/applications', methods=['GET'])
 @admin_required
 def get_applications():
     apps = query_db('SELECT * FROM applications ORDER BY submitted_at DESC')
-    # Convert datetime to string
     if apps:
         for a in apps:
             if a.get('submitted_at'):
@@ -367,7 +388,7 @@ def submit_application():
     data = request.json
     new_id = query_db(
         '''INSERT INTO applications (student_name, mobile, email, category, board, class_or_course, stream, status, submitted_at)
-           VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)''',
+           VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id''',
         (data['studentName'], data['mobile'], data.get('email', ''),
          data['category'], data.get('board', ''), data.get('classOrCourse', ''),
          data.get('stream', ''), 'New', datetime.now()),
@@ -381,7 +402,7 @@ def submit_application():
 def update_application(app_id):
     data = request.json
     query_db(
-        'UPDATE applications SET status = %s WHERE id = %s',
+        'UPDATE applications SET status = %s WHERE id = %s RETURNING id',
         (data['status'], app_id),
         commit=True
     )
@@ -391,20 +412,24 @@ def update_application(app_id):
 @app.route('/api/applications/<int:app_id>', methods=['DELETE'])
 @admin_required
 def delete_application(app_id):
-    query_db('DELETE FROM applications WHERE id = %s', (app_id,), commit=True)
+    query_db('DELETE FROM applications WHERE id = %s RETURNING id', (app_id,), commit=True)
     return jsonify({'success': True, 'message': 'Application deleted'})
 
 
 @app.route('/api/applications/count', methods=['GET'])
 @admin_required
 def get_app_count():
-    result = query_db("SELECT COUNT(*) as total, SUM(status='New') as new_count FROM applications", fetchone=True)
+    # PostgreSQL: SUM with a CASE expression instead of MySQL's SUM(condition)
+    result = query_db(
+        "SELECT COUNT(*) as total, SUM(CASE WHEN status='New' THEN 1 ELSE 0 END) as new_count FROM applications",
+        fetchone=True
+    )
     return jsonify(result or {'total': 0, 'new_count': 0})
 
 
-# ═══════════════════════════════════════════════════════════════
-#  BOARDS & STREAMS (static config, served from DB)
-# ═══════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
+#  BOARDS & STREAMS
+# ═══════════════════════════════════════════════════════════════════════════════
 
 @app.route('/api/boards', methods=['GET'])
 def get_boards():
@@ -417,35 +442,39 @@ def get_streams():
     return jsonify(['Science', 'Commerce', 'Arts'])
 
 
-# ═══════════════════════════════════════════════════════════════
-#  STATS (for admin dashboard)
-# ═══════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
+#  STATS (admin dashboard)
+# ═══════════════════════════════════════════════════════════════════════════════
 
 @app.route('/api/stats', methods=['GET'])
 @admin_required
 def get_stats():
     courses = query_db('SELECT COUNT(*) as count FROM courses', fetchone=True)
     results = query_db('SELECT COUNT(*) as count FROM results', fetchone=True)
-    apps = query_db("SELECT COUNT(*) as total, SUM(status='New') as new_count FROM applications", fetchone=True)
+    # PostgreSQL: CASE expression instead of SUM(condition = value)
+    apps = query_db(
+        "SELECT COUNT(*) as total, SUM(CASE WHEN status='New' THEN 1 ELSE 0 END) as new_count FROM applications",
+        fetchone=True
+    )
     exams = query_db('SELECT COUNT(*) as count FROM govt_exams', fetchone=True)
 
     return jsonify({
-        'courses': courses['count'] if courses else 0,
-        'results': results['count'] if results else 0,
-        'applications': apps['total'] if apps else 0,
+        'courses':         courses['count'] if courses else 0,
+        'results':         results['count'] if results else 0,
+        'applications':    apps['total'] if apps else 0,
         'newApplications': int(apps['new_count'] or 0) if apps else 0,
-        'govtExams': exams['count'] if exams else 0
+        'govtExams':       exams['count'] if exams else 0
     })
 
 
-# ═══════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
 #  MAIN
-# ═══════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
 
 if __name__ == '__main__':
     print("=" * 50)
-    print("  Tuition Class Website Server")
+    print("  Tuition Class Website Server (Supabase)")
     print("  http://localhost:5000")
     print("  Admin: http://localhost:5000/admin.html")
     print("=" * 50)
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=False, host='0.0.0.0', port=5000)
