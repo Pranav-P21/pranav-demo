@@ -156,7 +156,7 @@ def run():
                 )
 
             # Boards
-            for board in ['SSC', 'CBSE', 'ICSE', 'IGCSE']:
+            for board in ['State', 'CBSE', 'ICSE', 'IGCSE']:
                 cursor.execute('INSERT INTO boards (name) VALUES (%s)', (board,))
 
             # Courses
@@ -196,7 +196,7 @@ def run():
 
             # Results
             results_data = [
-                ('Ananya Deshmukh', 'SSC',  '10th', 2025, 98.4,
+                ('Ananya Deshmukh', 'State',  '10th', 2025, 98.4,
                  'School topper with distinction in all subjects. Secured highest marks in Mathematics.',
                  '', 'school', ''),
                 ('Rohan Mehta',     'CBSE', '10th', 2025, 97.8,
@@ -205,13 +205,13 @@ def run():
                 ('Priya Kulkarni',  'ICSE', '10th', 2025, 96.5,
                  'ICSE topper with excellent performance in English and Computer Science.',
                  '', 'school', ''),
-                ('Arjun Patil',     'SSC',  '12th', 2025, 95.2,
+                ('Arjun Patil',     'State',  '12th', 2025, 95.2,
                  'HSC Science topper. Secured admission in IIT Bombay.',
                  '', 'college', 'Science'),
                 ('Sneha Joshi',     'CBSE', '12th', 2025, 97.0,
                  'Commerce topper. Scored 100 in Accountancy. Pursuing CA.',
                  '', 'college', 'Commerce'),
-                ('Vikram Singh',    'SSC',  '10th', 2024, 96.8,
+                ('Vikram Singh',    'State',  '10th', 2024, 96.8,
                  'Previous year topper with distinction in all subjects.',
                  '', 'school', ''),
                 ('Kavita Rao',      'CBSE', '12th', 2024, 96.2,
